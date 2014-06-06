@@ -2,46 +2,42 @@ var http = require('http'),
     fs = require('fs');
 
 
+var routes = {};
+
+function route(url, route, headType, callback){
+  routes[url] = {
+    url: url,
+    route: route,
+    header: function(res) {
+      res.writeHead(200, {'Content-Type': 'text/' + headType});
+    },
+    callback: callback
+  };
+};
+
+route('/', '/public/index.html', 'html', function(req, res, currentRoute) {
+  fs.readFile(__dirname + currentRoute, function (err, data) {
+    if (err) console.log(err);
+    res.write(data);
+    res.end();
+  });
+});
+
+route('/js/app.js', '/public/js/main.js', 'javascript', function(req, res, currentRoute) {
+  fs.readFile(__dirname + currentRoute, function (err, data) {
+    if (err) console.log(err);
+    res.write(data);
+    res.end();
+  });
+});
 
 http.createServer(function (req, res) {
-  var indexFile;
-
-  if (req.url.indexOf('.html') !== -1 || req.url === '/') {
-    fs.readFile(__dirname + '/public/index.html', function (err, data) {
-      console.log(data)
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.write(data);
-      res.end();
-    });
-  };
-
-  if (req.url.indexOf('.css') !== -1) {
-    fs.readFile(__dirname + '/public/styles.css', function (err, data) {
-      res.writeHead(200, {'Content-Type': 'text/css'})
-      res.write(data);
-      res.end()
-    });
-  };
-
-  if (req.url.indexOf('main.js') !== -1) {
-    fs.readFile(__dirname + '/public/main.js', function (err, data) {
-      if (err) throw err;
-      res.writeHead(200, {'Content-Type': 'text/javascript'})
-      res.write(data);
-      res.end()
-    });
-  };
-
-  if (req.url.indexOf('angular.js') !== -1) {
-    fs.readFile(__dirname + '/public/bower_components/angular/angular.js', function (err, data) {
-      if (err) throw err;
-      res.writeHead(200, {'Content-Type': 'text/javascript'})
-      res.write(data);
-      res.end()
-    });
-  };
-
-
+  if (routes[req.url]) {
+    var currentRoute = routes[req.url].route;
+    routes[req.url].header(res);
+    routes[req.url].callback(req, res, currentRoute);
+  }
 }).listen(1337, '127.0.0.1');
 
 console.log('Server running at http://127.0.0.1:1337/');
+

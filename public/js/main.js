@@ -1,1 +1,1 @@
-angular.module('app', []);
+console.log('hi');
