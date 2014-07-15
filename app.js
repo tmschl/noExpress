@@ -1,7 +1,6 @@
 var http = require('http'),
     fs = require('fs');
 
-
 var routes = {};
 
 function route(url, route, headType, callback){
@@ -11,33 +10,29 @@ function route(url, route, headType, callback){
     header: function(res) {
       res.writeHead(200, {'Content-Type': 'text/' + headType});
     },
-    callback: callback
+    callback: function(req, res, currentRoute) {
+      fs.readFile(__dirname + currentRoute, function (err, data) {
+        if (err) console.log(err);
+        res.write(data);
+        res.end();
+      });
+    }
   };
 };
 
-route('/', '/public/index.html', 'html', function(req, res, currentRoute) {
-  fs.readFile(__dirname + currentRoute, function (err, data) {
-    if (err) console.log(err);
-    res.write(data);
-    res.end();
-  });
-});
+route('/', '/public/index.html', 'html');
 
-route('/js/app.js', '/public/js/main.js', 'javascript', function(req, res, currentRoute) {
-  fs.readFile(__dirname + currentRoute, function (err, data) {
-    if (err) console.log(err);
-    res.write(data);
-    res.end();
-  });
-});
+route('/js/app.js', '/public/js/main.js', 'javascript');
+
+route('/bower_components/angular/angular.js', '/public/bower_components/angular/angular.js', 'javascript');
 
 http.createServer(function (req, res) {
+  console.log(req.url);
   if (routes[req.url]) {
     var currentRoute = routes[req.url].route;
     routes[req.url].header(res);
     routes[req.url].callback(req, res, currentRoute);
   }
-}).listen(1337, '127.0.0.1');
+}).listen(3000, '127.0.0.1');
 
-console.log('Server running at http://127.0.0.1:1337/');
-
+console.log('Server running at http://127.0.0.1:3000/');
