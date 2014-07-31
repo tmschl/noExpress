@@ -27,16 +27,17 @@ route('/js/app.js', '/public/js/main.js', 'javascript');
 
 route('/bower_components/angular/angular.js', '/public/bower_components/angular/angular.js', 'javascript');
 
-route('/new', '', 'GET', function(req, res) {
+route('/new', '', 'POST', function(req, res) {
   console.log(req, res);
   res.writeHead(200, { 'Content-Type': 'text/html' });
   console.log('hi')
-  res.write()
+  console.log('lkhaldskfj')
+  res.write('winning')
   res.end();
 });
 
 http.createServer(function (req, res) {
-  console.log(req.url);
+  console.log(req.url, req.method);
 
   if (routes[req.url]) {
     var currentRoute = routes[req.url].route;
